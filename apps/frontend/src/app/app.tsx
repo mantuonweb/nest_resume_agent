@@ -1,11 +1,12 @@
 // Uncomment this line to use CSS modules
 // import styles from './app.module.scss';
-import NxWelcome from './nx-welcome';
+
+import { NestResumeAgent } from '../components/NestResumeAgent';
 
 export function App() {
   return (
-    <div>
-      <NxWelcome title="frontend" />
+    <div className="app">
+      <NestResumeAgent />
     </div>
   );
 }
