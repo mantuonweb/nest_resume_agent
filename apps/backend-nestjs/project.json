@@ -6,47 +6,29 @@
   "tags": ["type:backend", "scope:api", "framework:nestjs"],
   "targets": {
     "build": {
-      "executor": "@nx/js:node",
-      "outputs": ["{workspaceRoot}/dist/apps/backend-nestjs"],
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
       "options": {
+        "outputPath": "dist/apps/backend-nestjs",
         "main": "apps/backend-nestjs/src/main.ts",
-        "tsConfig": "apps/backend-nestjs/tsconfig.build.json",
-        "outputPath": "dist/apps/backend-nestjs"
+        "tsConfig": "apps/backend-nestjs/tsconfig.app.json",
+        "assets": ["apps/backend-nestjs/src/assets"]
       }
     },
     "serve": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
       "options": {
-        "command": "nest start --watch",
-        "cwd": "apps/backend-nestjs"
-      }
-    },
-    "start": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "nest start",
-        "cwd": "apps/backend-nestjs"
-      }
-    },
-    "start:dev": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "nest start --watch",
-        "cwd": "apps/backend-nestjs"
-      }
-    },
-    "start:debug": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "nest start --debug --watch",
-        "cwd": "apps/backend-nestjs"
-      }
-    },
-    "start:prod": {
-      "executor": "nx:run-commands",
-      "dependsOn": ["build"],
-      "options": {
-        "command": "node dist/apps/backend-nestjs/main.js"
+        "buildTarget": "backend-nestjs:build",
+        "watch": true
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "backend-nestjs:build:development"
+        },
+        "production": {
+          "buildTarget": "backend-nestjs:build:production"
+        }
       }
     },
     "lint": {
@@ -57,47 +39,11 @@
         "cwd": "apps/backend-nestjs"
       }
     },
-    "format": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-        "cwd": "apps/backend-nestjs"
-      }
-    },
     "test": {
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/coverage/apps/backend-nestjs"],
       "options": {
         "command": "jest",
-        "cwd": "apps/backend-nestjs"
-      }
-    },
-    "test:watch": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "jest --watch",
-        "cwd": "apps/backend-nestjs"
-      }
-    },
-    "test:cov": {
-      "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/coverage/apps/backend-nestjs"],
-      "options": {
-        "command": "jest --coverage",
-        "cwd": "apps/backend-nestjs"
-      }
-    },
-    "test:debug": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register ../../node_modules/.bin/jest --runInBand",
-        "cwd": "apps/backend-nestjs"
-      }
-    },
-    "test:e2e": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "jest --config ./test/jest-e2e.json",
         "cwd": "apps/backend-nestjs"
       }
     }
