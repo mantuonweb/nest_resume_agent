@@ -1,26 +1,26 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsNumber, Min, Max } from 'class-validator';
+import { ApiProperty } from "@nestjs/swagger";
+import { IsString, IsOptional, IsNumber, Min, Max } from "class-validator";
 
 export class QueryDto {
   @ApiProperty({
-    description: 'The query to send to the AI agent',
-    example: 'List all resumes in the database',
+    description: "The query to send to the AI agent",
+    example: "List all resumes in the database",
   })
   @IsString()
   query: string;
 
   @ApiProperty({
-    description: 'Thread ID for conversation context',
-    example: 'default',
+    description: "Thread ID for conversation context",
+    example: "default",
     required: false,
-    default: 'default',
+    default: "default",
   })
   @IsString()
   @IsOptional()
   threadId?: string;
 
   @ApiProperty({
-    description: 'Maximum number of iterations for the agent',
+    description: "Maximum number of iterations for the agent",
     example: 5,
     required: false,
     default: 5,

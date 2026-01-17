@@ -1,17 +1,17 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { ChatOpenAI } from '@langchain/openai';
-import { DynamicStructuredTool } from '@langchain/core/tools';
-import { StateGraph, END, START, Annotation } from '@langchain/langgraph';
-import { MemorySaver } from '@langchain/langgraph';
+import { Injectable, OnModuleInit } from "@nestjs/common";
+import { ChatOpenAI } from "@langchain/openai";
+import { DynamicStructuredTool } from "@langchain/core/tools";
+import { StateGraph, END, START, Annotation } from "@langchain/langgraph";
+import { MemorySaver } from "@langchain/langgraph";
 import {
   BaseMessage,
   HumanMessage,
   AIMessage,
   SystemMessage,
   ToolMessage,
-} from '@langchain/core/messages';
-import { ResumeService } from '../resume/resume.service';
-import { z } from 'zod';
+} from "@langchain/core/messages";
+import { ResumeService } from "../resume/resume.service";
+import { z } from "zod";
 
 // Define state annotation for the new API
 const AgentStateAnnotation = Annotation.Root({
@@ -41,7 +41,7 @@ export class AgentService implements OnModuleInit {
 
   constructor(private resumeService: ResumeService) {
     this.llm = new ChatOpenAI({
-      modelName: 'gpt-4o-mini',
+      modelName: "gpt-4o-mini",
       temperature: 0,
     });
 
@@ -67,14 +67,14 @@ Be helpful, concise, and accurate.`;
   onModuleInit() {
     this.initializeTools();
     this.createGraph();
-    console.log('✓ Agent initialized with LangGraph');
+    console.log("✓ Agent initialized with LangGraph");
     console.log(`✓ Tools: ${this.tools.length}`);
   }
 
   private initializeTools() {
     this.tools = [
       new DynamicStructuredTool({
-        name: 'ingest_resumes_tool',
+        name: "ingest_resumes_tool",
         description:
           "Ingest new resumes from the './resumes' folder into the vector database. Use this tool when new resumes need to be processed or the database needs to be updated.",
         schema: z.object({}),
@@ -83,36 +83,36 @@ Be helpful, concise, and accurate.`;
         },
       }),
       new DynamicStructuredTool({
-        name: 'list_resumes_tool',
+        name: "list_resumes_tool",
         description:
-          'List all the unique resume file names currently stored in the vector database. Use this tool to see what resumes have been ingested.',
+          "List all the unique resume file names currently stored in the vector database. Use this tool to see what resumes have been ingested.",
         schema: z.object({}),
         func: async () => {
           return await this.resumeService.listResumes();
         },
       }),
       new DynamicStructuredTool({
-        name: 'search_resumes_tool',
+        name: "search_resumes_tool",
         description:
           "Search for candidates whose resumes match the given skills. Input should be a comma-separated string of required skills (e.g., 'Python, Machine Learning, Docker'). Use this tool to find candidates for a job opening.",
         schema: z.object({
-          skills: z.string().describe('Comma-separated list of skills'),
+          skills: z.string().describe("Comma-separated list of skills"),
         }),
         func: async ({ skills }) => {
           return await this.resumeService.searchResumes(skills);
         },
       }),
       new DynamicStructuredTool({
-        name: 'clear_resumes_tool',
+        name: "clear_resumes_tool",
         description:
-          'Clear all resumes from the vector database. This will delete the entire resume database. Use this tool to start fresh or remove all stored resume data.',
+          "Clear all resumes from the vector database. This will delete the entire resume database. Use this tool to start fresh or remove all stored resume data.",
         schema: z.object({}),
         func: async () => {
           return await this.resumeService.clearResumes();
         },
       }),
       new DynamicStructuredTool({
-        name: 'count_resumes_tool',
+        name: "count_resumes_tool",
         description:
           "Count how many resume files are waiting in the './resumes' folder to be ingested. Use this to check if there are new resumes to process.",
         schema: z.object({}),
@@ -133,10 +133,7 @@ Be helpful, concise, and accurate.`;
 
       let messagesToSend = messages;
       if (iteration === 0) {
-        messagesToSend = [
-          new SystemMessage(this.systemMessage),
-          ...messages,
-        ];
+        messagesToSend = [new SystemMessage(this.systemMessage), ...messages];
       }
 
       const response = await llmWithTools.invoke(messagesToSend);
@@ -152,34 +149,39 @@ Be helpful, concise, and accurate.`;
       const { messages } = state;
       const lastMessage = messages[messages.length - 1] as AIMessage;
 
-      console.log(`\n🔧 Tool Node - Processing ${lastMessage.tool_calls?.length || 0} tool calls`);
+      console.log(
+        `\n🔧 Tool Node - Processing ${lastMessage.tool_calls?.length || 0} tool calls`,
+      );
 
       const toolMessages: ToolMessage[] = [];
 
       if (lastMessage.tool_calls && lastMessage.tool_calls.length > 0) {
         for (const toolCall of lastMessage.tool_calls) {
           const tool = this.tools.find((t) => t.name === toolCall.name);
-          
+
           if (tool) {
             try {
               console.log(`  ⚙️ Executing: ${toolCall.name}`);
               const result = await tool.invoke(toolCall.args || {});
-              
+
               toolMessages.push(
                 new ToolMessage({
-                  content: typeof result === 'string' ? result : JSON.stringify(result),
-                  tool_call_id: toolCall.id || '',
+                  content:
+                    typeof result === "string"
+                      ? result
+                      : JSON.stringify(result),
+                  tool_call_id: toolCall.id || "",
                   name: toolCall.name,
-                })
+                }),
               );
             } catch (error) {
               console.error(`  ❌ Tool error: ${error.message}`);
               toolMessages.push(
                 new ToolMessage({
                   content: `Error: ${error.message}`,
-                  tool_call_id: toolCall.id || '',
+                  tool_call_id: toolCall.id || "",
                   name: toolCall.name,
-                })
+                }),
               );
             }
           } else {
@@ -187,9 +189,9 @@ Be helpful, concise, and accurate.`;
             toolMessages.push(
               new ToolMessage({
                 content: `Error: Tool ${toolCall.name} not found`,
-                tool_call_id: toolCall.id || '',
+                tool_call_id: toolCall.id || "",
                 name: toolCall.name,
-              })
+              }),
             );
           }
         }
@@ -211,34 +213,34 @@ Be helpful, concise, and accurate.`;
 
       if (lastMessage.tool_calls && lastMessage.tool_calls.length > 0) {
         console.log(`🔧 Tool calls detected: ${lastMessage.tool_calls.length}`);
-        return 'tools';
+        return "tools";
       }
 
-      console.log('✓ No more tool calls - ending');
+      console.log("✓ No more tool calls - ending");
       return END;
     };
 
     const workflow = new StateGraph(AgentStateAnnotation)
-      .addNode('agent', agentNode)
-      .addNode('tools', toolNode)
-      .addEdge(START, 'agent')
-      .addConditionalEdges('agent', shouldContinue)
-      .addEdge('tools', 'agent');
+      .addNode("agent", agentNode)
+      .addNode("tools", toolNode)
+      .addEdge(START, "agent")
+      .addConditionalEdges("agent", shouldContinue)
+      .addEdge("tools", "agent");
 
     this.graph = workflow.compile({ checkpointer: this.memory });
   }
 
   async run(
     query: string,
-    threadId: string = 'default',
+    threadId: string = "default",
     maxIterations: number = 5,
   ): Promise<{ output: string; steps: any[]; iterations: number }> {
     try {
-      console.log('\n' + '='.repeat(60));
-      console.log('🚀 Starting Nested Agent');
+      console.log("\n" + "=".repeat(60));
+      console.log("🚀 Starting Nested Agent");
       console.log(`Query: ${query}`);
       console.log(`Thread ID: ${threadId}`);
-      console.log('='.repeat(60));
+      console.log("=".repeat(60));
 
       const initialState = {
         messages: [new HumanMessage(query)],
@@ -253,33 +255,30 @@ Be helpful, concise, and accurate.`;
       const steps: any[] = [];
       let finalState: any = null;
 
-      for await (const event of await this.graph.stream(
-        initialState,
-        config,
-      )) {
-        console.log(`\n📊 Event: ${Object.keys(event).join(', ')}`);
+      for await (const event of await this.graph.stream(initialState, config)) {
+        console.log(`\n📊 Event: ${Object.keys(event).join(", ")}`);
 
         for (const [nodeName, nodeState] of Object.entries(event)) {
-          if (nodeName === 'tools' && nodeState) {
+          if (nodeName === "tools" && nodeState) {
             const state = nodeState as any;
             if (state.messages) {
               for (const msg of state.messages) {
                 steps.push({
-                  node: 'tools',
-                  tool: msg.name || 'unknown',
+                  node: "tools",
+                  tool: msg.name || "unknown",
                   output: String(msg.content).substring(0, 200),
                 });
               }
             }
-          } else if (nodeName === 'agent' && nodeState) {
+          } else if (nodeName === "agent" && nodeState) {
             const state = nodeState as any;
             if (state.messages) {
               const lastMsg = state.messages[state.messages.length - 1];
               if (lastMsg.tool_calls && lastMsg.tool_calls.length > 0) {
                 for (const tc of lastMsg.tool_calls) {
                   steps.push({
-                    node: 'agent',
-                    action: 'tool_call',
+                    node: "agent",
+                    action: "tool_call",
                     tool: tc.name,
                     args: JSON.stringify(tc.args),
                   });
@@ -306,12 +305,12 @@ Be helpful, concise, and accurate.`;
       }
 
       return {
-        output: 'No response generated',
+        output: "No response generated",
         steps,
         iterations: 0,
       };
     } catch (error) {
-      console.error('❌ Agent execution error:', error);
+      console.error("❌ Agent execution error:", error);
       throw error;
     }
   }
