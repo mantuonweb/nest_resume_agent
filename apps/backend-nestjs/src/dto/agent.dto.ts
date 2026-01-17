@@ -1,18 +1,18 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { ApiProperty } from "@nestjs/swagger";
+import { IsString, IsNotEmpty, IsOptional } from "class-validator";
 
 export class AgentRequestDto {
   @ApiProperty({
-    description: 'Natural language query for the agent',
-    example: 'Find candidates who know Python and Machine Learning',
+    description: "Natural language query for the agent",
+    example: "Find candidates who know Python and Machine Learning",
   })
   @IsString()
   @IsNotEmpty()
   query: string;
 
   @ApiProperty({
-    description: 'Thread ID for conversation context',
-    example: 'default',
+    description: "Thread ID for conversation context",
+    example: "default",
     required: false,
   })
   @IsString()
@@ -42,8 +42,8 @@ export class AgentResponseDto {
 
 export class SearchRequestDto {
   @ApiProperty({
-    description: 'Comma-separated skills to search for',
-    example: 'Python, Machine Learning, Docker',
+    description: "Comma-separated skills to search for",
+    example: "Python, Machine Learning, Docker",
   })
   @IsString()
   @IsNotEmpty()
