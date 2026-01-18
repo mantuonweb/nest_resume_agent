@@ -2,31 +2,61 @@
 
 ## Overview
 
-A full-stack application platform built with Nx monorepo, featuring React frontend and NestJS backend services for resume agent functionality.
+A full-stack application platform built with Nx monorepo, featuring a React frontend and NestJS backend service for AI-powered resume agent functionality. The platform enables resume upload, storage, AI-powered querying, and intelligent candidate management.
+
+## Architecture
+
+```
+┌─────────────────┐
+│   Frontend      │
+│  (React+Vite)   │
+│   Port: 4200    │
+└────────┬────────┘
+         │
+         ▼
+┌──────────────────┐     ┌──────────────────┐
+│nest_resume_agent │────▶│  Vector Store    │
+│   NestJS API     │     │  (HNSWLib)       │
+│   Port: 3000     │     │                  │
+└──────────────────┘     └──────────────────┘
+```
 
 ## Projects
 
-### Frontend Applications
+### Frontend Application
 
 - **frontend** - React + Vite application for the user interface
+  - Resume upload and management
+  - AI-powered chat interface
+  - Candidate listing and statistics
+  - Real-time agent interactions
 
-### Backend Services
+### Backend Service
 
-- **backend-nestjs** - Main NestJS backend API service
-- **nest_resume_agent** - NestJS-based resume agent service
+- **nest_resume_agent** - NestJS-based resume agent service (Port: 3000)
+  - Resume upload and storage
+  - Vector database management (HNSWLib)
+  - AI agent integration with LangChain
+  - Natural language processing
+  - Resume analysis and intelligent matching
+  - Resume querying and retrieval
 
 ## Tech Stack
 
 ### Frontend
-- React
+- React 18
 - Vite
 - TypeScript
 - SCSS
+- Axios (API client)
 
 ### Backend
 - NestJS
 - TypeScript
 - Node.js
+- LangChain (AI/ML)
+- HNSWLib (Vector database)
+- Multer (File upload)
 
 ### Tooling
 - Nx (Monorepo management)
@@ -36,7 +66,7 @@ A full-stack application platform built with Nx monorepo, featuring React fronte
 
 ## Prerequisites
 
-- Node.js (v16 or higher)
+- Node.js (v18 or higher)
 - npm or yarn
 - Nx CLI (optional, but recommended)
 
@@ -64,13 +94,7 @@ nx serve frontend
 
 Access at: `http://localhost:4200`
 
-### Run Backend Services
-
-Start the main backend service:
-
-```bash
-nx serve backend-nestjs
-```
+### Run Backend Service
 
 Start the resume agent service:
 
@@ -78,12 +102,119 @@ Start the resume agent service:
 nx serve nest_resume_agent
 ```
 
+API available at: `http://localhost:3000`
+
 ### Run All Services
 
-To run multiple services simultaneously, use:
+To run both services simultaneously:
 
 ```bash
-nx run-many --target=serve --projects=frontend,backend-nestjs,nest_resume_agent
+nx run-many --target=serve --projects=frontend,nest_resume_agent --parallel=2
+```
+
+## Project Details
+
+### Frontend (`apps/frontend`)
+
+#### Features
+- **Resume Upload**: Drag-and-drop or file selection for resume uploads
+- **Agent Chat**: Interactive AI chat interface for querying resumes
+- **Candidate Cards**: Visual display of candidate information
+- **Resume List**: Comprehensive list of all uploaded resumes
+- **Statistics Dashboard**: Resume analytics and insights
+
+#### Key Components
+- `NestResumeAgent.tsx` - Main agent interface component
+- `AgentChat.tsx` - Chat interface for AI interactions
+- `ResumeUpload.tsx` - Resume upload functionality
+- `ResumeList.tsx` - Resume listing component
+- `CandidateCard.tsx` - Individual candidate display
+- `ResumeStats.tsx` - Statistics and analytics
+
+#### API Integration
+The frontend uses `apiClient.ts` service to communicate with the backend service at `http://localhost:3000`.
+
+#### Environment Variables
+
+Create `apps/frontend/.env`:
+
+```env
+VITE_API_URL=http://localhost:3000
+```
+
+### Resume Agent Service (`apps/nest_resume_agent`)
+
+#### Features
+- Resume file upload and storage
+- Vector database integration (HNSWLib)
+- AI-powered natural language query processing
+- Resume semantic search
+- Intelligent candidate matching
+- Context-aware responses
+- Document processing and indexing
+
+#### Project Structure
+```
+src/
+├── agent/                    # AI Agent module
+│   ├── agent.controller.ts   # Agent endpoints
+│   ├── agent.service.ts      # Agent business logic
+│   ├── agent.module.ts       # Agent module definition
+│   └── dto/                  # Data transfer objects
+│       ├── query.dto.ts
+│       └── query-response.dto.ts
+├── resume/                   # Resume management module
+│   ├── resume.controller.ts  # Resume endpoints
+│   ├── resume.service.ts     # Resume business logic
+│   └── resume.module.ts      # Resume module definition
+├── config/                   # Configuration module
+│   ├── app-config.service.ts
+│   └── config.module.ts
+├── dto/                      # Shared DTOs
+│   └── agent.dto.ts
+├── app.module.ts             # Root module
+└── main.ts                   # Application entry point
+```
+
+#### API Endpoints
+
+**Resume Endpoints**
+- `POST /resume/upload` - Upload a resume file
+- `GET /resume/list` - Get all resumes
+- `GET /resume/:id` - Get specific resume
+- `DELETE /resume/:id` - Delete a resume
+
+**Agent Endpoints**
+- `POST /agent/query` - Query the AI agent with natural language
+- `GET /agent/status` - Get agent status
+- `POST /agent/initialize` - Initialize vector store
+- `POST /agent/analyze` - Analyze resume content
+- `POST /agent/match` - Match candidates to job requirements
+
+#### Storage
+- **Resumes**: Stored in `apps/nest_resume_agent/resumes/`
+  - Example files:
+    - `mantu_nigam_resume-1768629921069-86966842.txt`
+    - `sarah_johnson_resume-1768629914151-564190360.txt`
+    - `vinod_malik_resume-1768629901277-220635803.txt`
+- **Vector DB**: Stored in `apps/nest_resume_agent/resume_db/`
+  - `args.json` - Vector store arguments
+  - `docstore.json` - Document store
+  - `hnswlib.index` - HNSW index file
+
+#### Environment Variables
+
+Create `apps/nest_resume_agent/.env`:
+
+```env
+PORT=3000
+NODE_ENV=development
+UPLOAD_DIR=./resumes
+VECTOR_DB_DIR=./resume_db
+OPENAI_API_KEY=your_openai_api_key
+MODEL_NAME=gpt-3.5-turbo
+TEMPERATURE=0.7
+MAX_TOKENS=500
 ```
 
 ## Development
@@ -94,7 +225,9 @@ Build a specific project:
 
 ```bash
 nx build frontend
-nx build backend-nestjs
+```
+
+```bash
 nx build nest_resume_agent
 ```
 
@@ -116,7 +249,9 @@ Test a specific project:
 
 ```bash
 nx test frontend
-nx test backend-nestjs
+```
+
+```bash
 nx test nest_resume_agent
 ```
 
@@ -137,7 +272,10 @@ nx affected --target=test
 Lint a specific project:
 
 ```bash
-nx lint backend-nestjs
+nx lint frontend
+```
+
+```bash
 nx lint nest_resume_agent
 ```
 
@@ -160,25 +298,74 @@ nx typecheck frontend
 ```
 .
 ├── apps/
-│   ├── frontend/                 # React + Vite frontend
+│   ├── frontend/                      # React + Vite frontend
 │   │   ├── src/
+│   │   │   ├── app/                   # App component
+│   │   │   │   ├── app.tsx
+│   │   │   │   └── app.module.scss
+│   │   │   ├── components/            # React components
+│   │   │   │   ├── AgentChat.tsx
+│   │   │   │   ├── CandidateCard.tsx
+│   │   │   │   ├── NestResumeAgent.tsx
+│   │   │   │   ├── NestResumeAgent.css
+│   │   │   │   ├── ResumeList.tsx
+│   │   │   │   ├── ResumeStats.tsx
+│   │   │   │   └── ResumeUpload.tsx
+│   │   │   ├── services/              # API services
+│   │   │   │   └── apiClient.ts
+│   │   │   ├── assets/                # Static assets
+│   │   │   ├── main.tsx               # Entry point
+│   │   │   └── styles.scss            # Global styles
+│   │   ├── public/
+│   │   │   └── favicon.ico
+│   │   ├── index.html
 │   │   ├── project.json
-│   │   ├── vite.config.ts
-│   │   └── README.md
-│   ├── backend-nestjs/           # Main NestJS backend
-│   │   ├── src/
-│   │   ├── test/
-│   │   ├── project.json
-│   │   └── README.md
-│   └── nest_resume_agent/        # Resume agent service
+│   │   ├── vite.config.mts
+│   │   └── tsconfig.json
+│   │
+│   └── nest_resume_agent/             # Resume agent service (Port: 3000)
 │       ├── src/
+│       │   ├── agent/                 # Agent module
+│       │   │   ├── agent.controller.ts
+│       │   │   ├── agent.service.ts
+│       │   │   ├── agent.module.ts
+│       │   │   └── dto/
+│       │   │       ├── query.dto.ts
+│       │   │       └── query-response.dto.ts
+│       │   ├── resume/                # Resume module
+│       │   │   ├── resume.controller.ts
+│       │   │   ├── resume.service.ts
+│       │   │   └── resume.module.ts
+│       │   ├── config/                # Configuration
+│       │   │   ├── app-config.service.ts
+│       │   │   └── config.module.ts
+│       │   ├── dto/                   # Shared DTOs
+│       │   │   └── agent.dto.ts
+│       │   ├── app.controller.ts
+│       │   ├── app.controller.spec.ts
+│       │   ├── app.module.ts
+│       │   ├── app.service.ts
+│       │   └── main.ts
+│       ├── resumes/                   # Uploaded resume files
+│       │   ├── mantu_nigam_resume-1768629921069-86966842.txt
+│       │   ├── sarah_johnson_resume-1768629914151-564190360.txt
+│       │   └── vinod_malik_resume-1768629901277-220635803.txt
+│       ├── resume_db/                 # Vector database
+│       │   ├── args.json
+│       │   ├── docstore.json
+│       │   └── hnswlib.index
 │       ├── test/
+│       │   ├── app.e2e-spec.ts
+│       │   └── jest-e2e.json
 │       ├── project.json
-│       └── README.md
-├── libs/                         # Shared libraries
-├── dist/                         # Build output
+│       ├── nest-cli.json
+│       ├── jest.config.js
+│       └── tsconfig.json
+│
+├── libs/                              # Shared libraries
+├── dist/                              # Build output
 ├── node_modules/
-├── nx.json                       # Nx workspace configuration
+├── nx.json                            # Nx workspace configuration
 ├── package.json
 ├── tsconfig.base.json
 └── README.md
@@ -214,25 +401,34 @@ nx typecheck frontend
 | `nx run-many --target=<target> --projects=<p1,p2>` | Run target on specific projects |
 | `nx affected --target=<target>` | Run target on affected projects |
 
-## Environment Configuration
+## Usage Examples
 
-### Frontend Environment Variables
+### Upload a Resume
 
-Create `.env` files in `apps/frontend/`:
-
-```env
-VITE_API_URL=http://localhost:3000
-VITE_RESUME_AGENT_URL=http://localhost:3001
+```bash
+curl -X POST http://localhost:3000/resume/upload \
+  -F "file=@resume.pdf" \
+  -F "name=John Doe"
 ```
 
-### Backend Environment Variables
+### Query the Agent
 
-Create `.env` files in backend projects:
+```bash
+curl -X POST http://localhost:3000/agent/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Find candidates with Python experience"}'
+```
 
-```env
-PORT=3000
-NODE_ENV=development
-DATABASE_URL=postgresql://user:password@localhost:5432/db
+### Get Resume List
+
+```bash
+curl http://localhost:3000/resume/list
+```
+
+### Get Agent Status
+
+```bash
+curl http://localhost:3000/agent/status
 ```
 
 ## Nx Features
@@ -242,8 +438,11 @@ DATABASE_URL=postgresql://user:password@localhost:5432/db
 Nx caches build and test results for faster execution:
 
 ```bash
-nx build frontend  # First run - slow
-nx build frontend  # Second run - instant (from cache)
+nx build frontend
+```
+
+```bash
+nx build frontend
 ```
 
 Clear cache:
@@ -272,7 +471,13 @@ Only run tasks on projects affected by changes:
 
 ```bash
 nx affected:build
+```
+
+```bash
 nx affected:test
+```
+
+```bash
 nx affected:lint
 ```
 
@@ -281,7 +486,7 @@ nx affected:lint
 Run tasks in parallel for better performance:
 
 ```bash
-nx run-many --target=build --all --parallel=3
+nx run-many --target=build --all --parallel=2
 ```
 
 ## CI/CD Integration
@@ -319,7 +524,6 @@ nx run-many --target=build --all --configuration=production
 
 Build outputs:
 - Frontend: `dist/apps/frontend`
-- Backend NestJS: `dist/apps/backend-nestjs`
 - Resume Agent: `dist/apps/nest_resume_agent`
 
 ## Deployment
@@ -332,14 +536,44 @@ The frontend can be deployed to:
 - AWS S3 + CloudFront
 - Any static hosting service
 
+Build command:
+
+```bash
+nx build frontend --configuration=production
+```
+
 ### Backend Deployment
 
-The backend services can be deployed to:
+The backend service can be deployed to:
 - AWS (EC2, ECS, Lambda)
 - Google Cloud Platform
 - Heroku
 - Docker containers
 - Kubernetes
+
+#### Docker Example
+
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY dist/apps/nest_resume_agent ./
+COPY apps/nest_resume_agent/resumes ./resumes
+COPY apps/nest_resume_agent/resume_db ./resume_db
+EXPOSE 3000
+CMD ["node", "main.js"]
+```
+
+Build and run:
+
+```bash
+docker build -t resume-agent .
+```
+
+```bash
+docker run -p 3000:3000 -e OPENAI_API_KEY=your_key resume-agent
+```
 
 ## Troubleshooting
 
@@ -353,6 +587,9 @@ nx reset
 
 ```bash
 rm -rf node_modules package-lock.json
+```
+
+```bash
 npm install
 ```
 
@@ -360,7 +597,42 @@ npm install
 
 ```bash
 nx show project frontend --web
-nx show project backend-nestjs --web
+```
+
+```bash
+nx show project nest_resume_agent --web
+```
+
+### Port Already in Use
+
+If you get a port conflict error on port 3000:
+
+```bash
+lsof -ti:3000 | xargs kill -9
+```
+
+If you get a port conflict error on port 4200:
+
+```bash
+lsof -ti:4200 | xargs kill -9
+```
+
+### Vector Database Issues
+
+If the vector database is corrupted, delete and reinitialize:
+
+```bash
+rm -rf apps/nest_resume_agent/resume_db/*
+```
+
+Then restart the backend service to reinitialize.
+
+### Resume Upload Issues
+
+Ensure the resumes directory exists:
+
+```bash
+mkdir -p apps/nest_resume_agent/resumes
 ```
 
 ## Contributing
@@ -378,3 +650,8 @@ nx show project backend-nestjs --web
 - [Vite Documentation](https://vitejs.dev)
 - [NestJS Documentation](https://docs.nestjs.com)
 - [TypeScript Documentation](https://www.typescriptlang.org)
+- [LangChain Documentation](https://js.langchain.com)
+
+## License
+
+MIT
