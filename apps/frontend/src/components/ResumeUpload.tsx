@@ -8,7 +8,10 @@ interface ResumeUploadProps {
 export function ResumeUpload({ onUploadSuccess }: ResumeUploadProps) {
   const [files, setFiles] = useState<FileList | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [message, setMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFiles(e.target.files);
@@ -27,7 +30,10 @@ export function ResumeUpload({ onUploadSuccess }: ResumeUploadProps) {
       setFiles(null);
       onUploadSuccess();
     } catch (error) {
-      setMessage({ type: 'error', text: error instanceof Error ? error.message : 'Upload failed' });
+      setMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Upload failed',
+      });
     } finally {
       setUploading(false);
     }
@@ -41,11 +47,17 @@ export function ResumeUpload({ onUploadSuccess }: ResumeUploadProps) {
 
     try {
       const result = await apiClient.uploadMultipleResumes(Array.from(files));
-      setMessage({ type: 'success', text: `${result.count} files uploaded successfully` });
+      setMessage({
+        type: 'success',
+        text: `${result.count} files uploaded successfully`,
+      });
       setFiles(null);
       onUploadSuccess();
     } catch (error) {
-      setMessage({ type: 'error', text: error instanceof Error ? error.message : 'Upload failed' });
+      setMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Upload failed',
+      });
     } finally {
       setUploading(false);
     }
@@ -60,7 +72,10 @@ export function ResumeUpload({ onUploadSuccess }: ResumeUploadProps) {
       setMessage({ type: 'success', text: result.message });
       onUploadSuccess();
     } catch (error) {
-      setMessage({ type: 'error', text: error instanceof Error ? error.message : 'Ingestion failed' });
+      setMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Ingestion failed',
+      });
     } finally {
       setUploading(false);
     }
@@ -69,7 +84,7 @@ export function ResumeUpload({ onUploadSuccess }: ResumeUploadProps) {
   return (
     <div className="resume-upload">
       <h2>📤 Upload Resumes</h2>
-      
+
       <div className="upload-section">
         <div className="file-input-wrapper">
           <input
@@ -120,7 +135,9 @@ export function ResumeUpload({ onUploadSuccess }: ResumeUploadProps) {
 
       <div className="ingest-section">
         <h3>🔄 Process Uploaded Resumes</h3>
-        <p>Ingest all resumes from the ./resumes folder into the vector database</p>
+        <p>
+          Ingest all resumes from the ./resumes folder into the vector database
+        </p>
         <button
           onClick={handleIngest}
           disabled={uploading}
@@ -131,9 +148,7 @@ export function ResumeUpload({ onUploadSuccess }: ResumeUploadProps) {
       </div>
 
       {message && (
-        <div className={`message-box ${message.type}`}>
-          {message.text}
-        </div>
+        <div className={`message-box ${message.type}`}>{message.text}</div>
       )}
     </div>
   );

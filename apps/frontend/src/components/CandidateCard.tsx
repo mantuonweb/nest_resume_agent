@@ -36,8 +36,14 @@ export function CandidateCard({ candidate, rank }: CandidateCardProps) {
         <div className="candidate-rank">#{rank}</div>
         <div className="candidate-info">
           <h3 className="candidate-name">{candidate.name}</h3>
-          <div className="match-badge" style={{ backgroundColor: getMatchColor(candidate.matchPercentage) }}>
-            {candidate.matchPercentage}% - {getMatchLabel(candidate.matchPercentage)}
+          <div
+            className="match-badge"
+            style={{
+              backgroundColor: getMatchColor(candidate.matchPercentage),
+            }}
+          >
+            {candidate.matchPercentage}% -{' '}
+            {getMatchLabel(candidate.matchPercentage)}
           </div>
         </div>
       </div>
@@ -55,16 +61,14 @@ export function CandidateCard({ candidate, rank }: CandidateCardProps) {
 
       {candidate.whyGoodFit && (
         <div className="candidate-fit">
-          <button 
+          <button
             className="expand-button"
             onClick={() => setExpanded(!expanded)}
           >
             {expanded ? '▼' : '▶'} Why they're a good fit
           </button>
           {expanded && (
-            <div className="fit-content">
-              {candidate.whyGoodFit}
-            </div>
+            <div className="fit-content">{candidate.whyGoodFit}</div>
           )}
         </div>
       )}

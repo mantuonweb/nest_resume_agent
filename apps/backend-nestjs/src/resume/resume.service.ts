@@ -1,13 +1,13 @@
-import { Injectable } from "@nestjs/common";
-import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
-import { HNSWLib } from "@langchain/community/vectorstores/hnswlib";
-import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
-import { TextLoader } from "langchain/document_loaders/fs/text";
-import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
-import { DirectoryLoader } from "langchain/document_loaders/fs/directory";
-import { AppConfigService } from "../config/app-config.service";
-import * as fs from "fs";
-import * as path from "path";
+import { Injectable } from '@nestjs/common';
+import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
+import { HNSWLib } from '@langchain/community/vectorstores/hnswlib';
+import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
+import { TextLoader } from 'langchain/document_loaders/fs/text';
+import { PDFLoader } from '@langchain/community/document_loaders/fs/pdf';
+import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
+import { AppConfigService } from '../config/app-config.service';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class ResumeService {
@@ -15,28 +15,28 @@ export class ResumeService {
 
   constructor(private config: AppConfigService) {
     this.embeddings = new OpenAIEmbeddings({
-      modelName: "text-embedding-3-small",
+      modelName: 'text-embedding-3-small',
     });
   }
 
   async ingestResumes(): Promise<string> {
-    console.log("📥 Ingesting resumes...");
+    console.log('📥 Ingesting resumes...');
 
     try {
       const txtLoader = new DirectoryLoader(this.config.RESUMES_DIR, {
-        ".txt": (path) => new TextLoader(path),
+        '.txt': (path) => new TextLoader(path),
       });
       const txtDocs = await txtLoader.load();
 
       const pdfLoader = new DirectoryLoader(this.config.RESUMES_DIR, {
-        ".pdf": (path) => new PDFLoader(path),
+        '.pdf': (path) => new PDFLoader(path),
       });
       const pdfDocs = await pdfLoader.load();
 
       const allDocs = [...txtDocs, ...pdfDocs];
 
       if (allDocs.length === 0) {
-        return "No resumes found in ./resumes folder";
+        return 'No resumes found in ./resumes folder';
       }
 
       console.log(`📄 Found ${allDocs.length} documents`);
@@ -49,30 +49,30 @@ export class ResumeService {
 
       console.log(`✂️ Split into ${chunks.length} chunks`);
 
-      const dbPath = path.join(this.config.DB_DIR, "hnswlib.index");
+      const dbPath = path.join(this.config.DB_DIR, 'hnswlib.index');
       const dbExists = fs.existsSync(dbPath);
 
       let vectorStore: HNSWLib;
       let result: string;
 
       if (dbExists) {
-        console.log("📂 Loading existing database...");
+        console.log('📂 Loading existing database...');
         vectorStore = await HNSWLib.load(this.config.DB_DIR, this.embeddings);
         await vectorStore.addDocuments(chunks);
         result = `Added ${chunks.length} chunks from ${allDocs.length} resumes to existing database`;
       } else {
-        console.log("🆕 Creating new database...");
+        console.log('🆕 Creating new database...');
         vectorStore = await HNSWLib.fromDocuments(chunks, this.embeddings);
         result = `Created new database with ${chunks.length} chunks from ${allDocs.length} resumes`;
       }
 
-      console.log("💾 Saving database...");
+      console.log('💾 Saving database...');
       await vectorStore.save(this.config.DB_DIR);
 
       // Verify the save
-      const indexPath = path.join(this.config.DB_DIR, "hnswlib.index");
-      const docstorePath = path.join(this.config.DB_DIR, "docstore.json");
-      const argsPath = path.join(this.config.DB_DIR, "args.json");
+      const indexPath = path.join(this.config.DB_DIR, 'hnswlib.index');
+      const docstorePath = path.join(this.config.DB_DIR, 'docstore.json');
+      const argsPath = path.join(this.config.DB_DIR, 'args.json');
 
       console.log(`✓ Index file exists: ${fs.existsSync(indexPath)}`);
       console.log(`✓ Docstore file exists: ${fs.existsSync(docstorePath)}`);
@@ -81,34 +81,34 @@ export class ResumeService {
       console.log(`✓ ${result}`);
       return result;
     } catch (error) {
-      console.error("Error ingesting resumes:", error);
+      console.error('Error ingesting resumes:', error);
       throw error;
     }
   }
 
   async listResumes(): Promise<string> {
-    console.log("📋 Listing resumes...");
+    console.log('📋 Listing resumes...');
 
-    const indexPath = path.join(this.config.DB_DIR, "hnswlib.index");
-    const docstorePath = path.join(this.config.DB_DIR, "docstore.json");
+    const indexPath = path.join(this.config.DB_DIR, 'hnswlib.index');
+    const docstorePath = path.join(this.config.DB_DIR, 'docstore.json');
 
     console.log(`Checking for index at: ${indexPath}`);
     console.log(`Index exists: ${fs.existsSync(indexPath)}`);
     console.log(`Docstore exists: ${fs.existsSync(docstorePath)}`);
 
     if (!fs.existsSync(indexPath) || !fs.existsSync(docstorePath)) {
-      return "No database found. Please ingest resumes first.";
+      return 'No database found. Please ingest resumes first.';
     }
 
     try {
-      console.log("Loading vector store...");
+      console.log('Loading vector store...');
       const vectorStore = await HNSWLib.load(
         this.config.DB_DIR,
         this.embeddings,
       );
 
-      console.log("Performing similarity search...");
-      const docs = await vectorStore.similaritySearch("", 100);
+      console.log('Performing similarity search...');
+      const docs = await vectorStore.similaritySearch('', 100);
 
       console.log(`Found ${docs.length} documents`);
 
@@ -122,7 +122,7 @@ export class ResumeService {
       });
 
       if (sources.size === 0) {
-        return "Database exists but contains no resumes with metadata";
+        return 'Database exists but contains no resumes with metadata';
       }
 
       let result = `Found ${sources.size} resumes in database:\n`;
@@ -134,7 +134,7 @@ export class ResumeService {
 
       return result;
     } catch (error) {
-      console.error("Error listing resumes:", error);
+      console.error('Error listing resumes:', error);
       throw error;
     }
   }
@@ -142,11 +142,11 @@ export class ResumeService {
   async searchResumes(skills: string): Promise<string> {
     console.log(`🔍 Searching for candidates with skills: ${skills}`);
 
-    const indexPath = path.join(this.config.DB_DIR, "hnswlib.index");
-    const docstorePath = path.join(this.config.DB_DIR, "docstore.json");
+    const indexPath = path.join(this.config.DB_DIR, 'hnswlib.index');
+    const docstorePath = path.join(this.config.DB_DIR, 'docstore.json');
 
     if (!fs.existsSync(indexPath) || !fs.existsSync(docstorePath)) {
-      return "No database found. Please ingest resumes first.";
+      return 'No database found. Please ingest resumes first.';
     }
 
     try {
@@ -158,7 +158,7 @@ export class ResumeService {
 
       const context = docs
         .map((doc, i) => `Resume ${i + 1}:\n${doc.pageContent}`)
-        .join("\n\n");
+        .join('\n\n');
 
       const prompt = `You are a recruiter assistant. Based on the following resume excerpts, identify and rank the best candidates for the required skills.
 
@@ -181,30 +181,30 @@ Format each candidate like this:
 
 Answer:`;
 
-      const llm = new ChatOpenAI({ modelName: "gpt-4o-mini", temperature: 0 });
+      const llm = new ChatOpenAI({ modelName: 'gpt-4o-mini', temperature: 0 });
       const response = await llm.invoke(prompt);
 
-      console.log("\n" + "=".repeat(60));
-      console.log("🎯 SEARCH RESULTS");
-      console.log("=".repeat(60));
+      console.log('\n' + '='.repeat(60));
+      console.log('🎯 SEARCH RESULTS');
+      console.log('='.repeat(60));
       console.log(response.content);
-      console.log("=".repeat(60));
+      console.log('='.repeat(60));
 
       return response.content as string;
     } catch (error) {
-      console.error("Error searching resumes:", error);
+      console.error('Error searching resumes:', error);
       throw error;
     }
   }
 
   async clearResumes(): Promise<string> {
-    console.log("🗑️ Clearing resume database...");
+    console.log('🗑️ Clearing resume database...');
     if (fs.existsSync(this.config.DB_DIR)) {
       fs.rmSync(this.config.DB_DIR, { recursive: true, force: true });
       fs.mkdirSync(this.config.DB_DIR, { recursive: true });
-      return "Database cleared successfully";
+      return 'Database cleared successfully';
     } else {
-      return "No database found";
+      return 'No database found';
     }
   }
 
@@ -214,7 +214,7 @@ Answer:`;
     }
     const files = fs
       .readdirSync(this.config.RESUMES_DIR)
-      .filter((f) => f.endsWith(".txt") || f.endsWith(".pdf"));
-    return `Found ${files.length} resume files: ${files.join(", ")}`;
+      .filter((f) => f.endsWith('.txt') || f.endsWith('.pdf'));
+    return `Found ${files.length} resume files: ${files.join(', ')}`;
   }
 }

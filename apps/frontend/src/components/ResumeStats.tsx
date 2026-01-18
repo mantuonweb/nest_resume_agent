@@ -7,7 +7,9 @@ interface ResumeStatsProps {
 
 export function ResumeStats({ refreshTrigger }: ResumeStatsProps) {
   const [pendingCount, setPendingCount] = useState<string>('');
-  const [agentHealth, setAgentHealth] = useState<'ok' | 'error' | 'loading'>('loading');
+  const [agentHealth, setAgentHealth] = useState<'ok' | 'error' | 'loading'>(
+    'loading',
+  );
 
   useEffect(() => {
     loadStats();
@@ -36,7 +38,11 @@ export function ResumeStats({ refreshTrigger }: ResumeStatsProps) {
       <div className="stat-card">
         <h4>🏥 Agent Status</h4>
         <p className={`status-${agentHealth}`}>
-          {agentHealth === 'ok' ? '✅ Healthy' : agentHealth === 'error' ? '❌ Error' : '⏳ Loading'}
+          {agentHealth === 'ok'
+            ? '✅ Healthy'
+            : agentHealth === 'error'
+              ? '❌ Error'
+              : '⏳ Loading'}
         </p>
       </div>
     </div>

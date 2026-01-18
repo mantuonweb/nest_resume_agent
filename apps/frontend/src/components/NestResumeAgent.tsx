@@ -6,11 +6,13 @@ import { ResumeStats } from './ResumeStats';
 import './NestResumeAgent.css';
 
 export function NestResumeAgent() {
-  const [activeTab, setActiveTab] = useState<'chat' | 'upload' | 'manage'>('chat');
+  const [activeTab, setActiveTab] = useState<'chat' | 'upload' | 'manage'>(
+    'chat',
+  );
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleRefresh = () => {
-    setRefreshTrigger(prev => prev + 1);
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   return (
@@ -43,8 +45,15 @@ export function NestResumeAgent() {
 
       <main className="agent-content">
         {activeTab === 'chat' && <AgentChat />}
-        {activeTab === 'upload' && <ResumeUpload onUploadSuccess={handleRefresh} />}
-        {activeTab === 'manage' && <ResumeList refreshTrigger={refreshTrigger} onRefresh={handleRefresh} />}
+        {activeTab === 'upload' && (
+          <ResumeUpload onUploadSuccess={handleRefresh} />
+        )}
+        {activeTab === 'manage' && (
+          <ResumeList
+            refreshTrigger={refreshTrigger}
+            onRefresh={handleRefresh}
+          />
+        )}
       </main>
     </div>
   );

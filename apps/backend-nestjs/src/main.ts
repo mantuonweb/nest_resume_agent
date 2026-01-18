@@ -1,7 +1,7 @@
-import { NestFactory } from "@nestjs/core";
-import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
-import { ValidationPipe } from "@nestjs/common";
-import { AppModule } from "./app.module";
+import { NestFactory } from '@nestjs/core';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ValidationPipe } from '@nestjs/common';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,20 +20,20 @@ async function bootstrap() {
 
   // Swagger configuration
   const config = new DocumentBuilder()
-    .setTitle("Resume Management API")
-    .setDescription("AI-powered resume management system with LangGraph agent")
-    .setVersion("4.0.0")
-    .addTag("agent", "AI Agent operations")
-    .addTag("resume", "Resume management")
-    .addTag("health", "Health check endpoints")
+    .setTitle('Resume Management API')
+    .setDescription('AI-powered resume management system with LangGraph agent')
+    .setVersion('4.0.0')
+    .addTag('agent', 'AI Agent operations')
+    .addTag('resume', 'Resume management')
+    .addTag('health', 'Health check endpoints')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup("api", app, document, {
+  SwaggerModule.setup('api', app, document, {
     swaggerOptions: {
       persistAuthorization: true,
-      tagsSorter: "alpha",
-      operationsSorter: "alpha",
+      tagsSorter: 'alpha',
+      operationsSorter: 'alpha',
     },
   });
 

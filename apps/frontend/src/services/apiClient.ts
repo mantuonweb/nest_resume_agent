@@ -16,7 +16,7 @@ export const apiClient = {
 
   async uploadMultipleResumes(files: File[]) {
     const formData = new FormData();
-    files.forEach(file => formData.append('files', file));
+    files.forEach((file) => formData.append('files', file));
 
     const response = await fetch(`${API_BASE_URL}/resume/upload-multiple`, {
       method: 'POST',
@@ -57,7 +57,11 @@ export const apiClient = {
     return response.json();
   },
 
-  async queryAgent(data: { query: string; threadId?: string; maxIterations?: number }) {
+  async queryAgent(data: {
+    query: string;
+    threadId?: string;
+    maxIterations?: number;
+  }) {
     const response = await fetch(`${API_BASE_URL}/agent/query`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

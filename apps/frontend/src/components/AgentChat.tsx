@@ -36,28 +36,34 @@ export function AgentChat() {
 
   const parseCandidates = (content: string): Candidate[] | null => {
     const candidates: Candidate[] = [];
-    
+
     // Check if response contains candidate information
     if (!content.includes('**') || !content.includes('Matching Percentage')) {
       return null;
     }
 
     // Split by numbered candidates
-    const candidateSections = content.split(/\d+\.\s+\*\*/).filter(s => s.trim());
+    const candidateSections = content
+      .split(/\d+\.\s+\*\*/)
+      .filter((s) => s.trim());
 
-    candidateSections.forEach(section => {
+    candidateSections.forEach((section) => {
       const nameMatch = section.match(/^([^*]+)\*\*/);
       const skillsMatch = section.match(/\*\*Relevant Skills:\*\*\s*([^\n]+)/);
-      const fitMatch = section.match(/\*\*Why They Are a Good Fit:\*\*\s*([^\n]+(?:\n(?!\*\*)[^\n]+)*)/);
-      const percentageMatch = section.match(/\*\*Matching Percentage:\*\*\s*(\d+)%/);
+      const fitMatch = section.match(
+        /\*\*Why They Are a Good Fit:\*\*\s*([^\n]+(?:\n(?!\*\*)[^\n]+)*)/,
+      );
+      const percentageMatch = section.match(
+        /\*\*Matching Percentage:\*\*\s*(\d+)%/,
+      );
 
       if (nameMatch && skillsMatch) {
         candidates.push({
           name: nameMatch[1].trim(),
-          skills: skillsMatch[1].split(',').map(s => s.trim()),
+          skills: skillsMatch[1].split(',').map((s) => s.trim()),
           experience: fitMatch ? fitMatch[1].trim() : '',
           matchPercentage: percentageMatch ? parseInt(percentageMatch[1]) : 0,
-          whyGoodFit: fitMatch ? fitMatch[1].trim() : ''
+          whyGoodFit: fitMatch ? fitMatch[1].trim() : '',
         });
       }
     });
@@ -75,7 +81,7 @@ export function AgentChat() {
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setLoading(true);
 
@@ -97,14 +103,14 @@ export function AgentChat() {
         candidates: candidates || undefined,
       };
 
-      setMessages(prev => [...prev, agentMessage]);
+      setMessages((prev) => [...prev, agentMessage]);
     } catch (error) {
       const errorMessage: Message = {
         role: 'agent',
         content: `Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`,
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setLoading(false);
     }
@@ -158,15 +164,20 @@ export function AgentChat() {
                   {msg.timestamp.toLocaleTimeString()}
                 </span>
               </div>
-              
+
               {msg.candidates ? (
                 <div className="candidates-response">
                   <div className="response-summary">
-                    Found {msg.candidates.length} matching candidate{msg.candidates.length !== 1 ? 's' : ''}
+                    Found {msg.candidates.length} matching candidate
+                    {msg.candidates.length !== 1 ? 's' : ''}
                   </div>
                   <div className="candidates-grid">
                     {msg.candidates.map((candidate, cidx) => (
-                      <CandidateCard key={cidx} candidate={candidate} rank={cidx + 1} />
+                      <CandidateCard
+                        key={cidx}
+                        candidate={candidate}
+                        rank={cidx + 1}
+                      />
                     ))}
                   </div>
                 </div>
@@ -177,10 +188,12 @@ export function AgentChat() {
                   ))}
                 </div>
               )}
-              
+
               {msg.iterations && (
                 <div className="message-meta">
-                  <span className="meta-badge">⚡ {msg.iterations} iterations</span>
+                  <span className="meta-badge">
+                    ⚡ {msg.iterations} iterations
+                  </span>
                 </div>
               )}
             </div>
@@ -213,7 +226,11 @@ export function AgentChat() {
           disabled={loading}
           className="chat-input"
         />
-        <button type="submit" disabled={loading || !input.trim()} className="send-button">
+        <button
+          type="submit"
+          disabled={loading || !input.trim()}
+          className="send-button"
+        >
           {loading ? '⏳' : '→'}
         </button>
       </form>

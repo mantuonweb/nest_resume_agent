@@ -10,7 +10,10 @@ interface ResumeListProps {
 export function ResumeList({ refreshTrigger, onRefresh }: ResumeListProps) {
   const [resumes, setResumes] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [message, setMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   useEffect(() => {
     loadResumes();
@@ -33,7 +36,11 @@ export function ResumeList({ refreshTrigger, onRefresh }: ResumeListProps) {
   };
 
   const handleClearDatabase = async () => {
-    if (!confirm('Are you sure you want to clear the entire database? This cannot be undone.')) {
+    if (
+      !confirm(
+        'Are you sure you want to clear the entire database? This cannot be undone.',
+      )
+    ) {
       return;
     }
 
@@ -61,7 +68,11 @@ export function ResumeList({ refreshTrigger, onRefresh }: ResumeListProps) {
       <div className="database-section">
         <div className="section-header">
           <h3>Resumes in Database ({resumes.length})</h3>
-          <button onClick={loadResumes} disabled={loading} className="btn-refresh">
+          <button
+            onClick={loadResumes}
+            disabled={loading}
+            className="btn-refresh"
+          >
             🔄 Refresh
           </button>
         </div>
@@ -69,7 +80,10 @@ export function ResumeList({ refreshTrigger, onRefresh }: ResumeListProps) {
         {loading ? (
           <p>Loading...</p>
         ) : resumes.length === 0 ? (
-          <p className="empty-state">No resumes in database yet. Upload and ingest some resumes to get started.</p>
+          <p className="empty-state">
+            No resumes in database yet. Upload and ingest some resumes to get
+            started.
+          </p>
         ) : (
           <ul className="resume-items">
             {resumes.map((resume, idx) => (
@@ -83,7 +97,10 @@ export function ResumeList({ refreshTrigger, onRefresh }: ResumeListProps) {
 
       <div className="danger-zone">
         <h3>⚠️ Danger Zone</h3>
-        <p>Clear all resumes from the vector database. This action cannot be undone.</p>
+        <p>
+          Clear all resumes from the vector database. This action cannot be
+          undone.
+        </p>
         <button
           onClick={handleClearDatabase}
           disabled={loading}
@@ -94,9 +111,7 @@ export function ResumeList({ refreshTrigger, onRefresh }: ResumeListProps) {
       </div>
 
       {message && (
-        <div className={`message-box ${message.type}`}>
-          {message.text}
-        </div>
+        <div className={`message-box ${message.type}`}>{message.text}</div>
       )}
     </div>
   );
